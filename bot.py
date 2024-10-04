@@ -3,17 +3,22 @@ import os
 import time
 from dotenv import load_dotenv, find_dotenv
 import argparse
-from random import shuffle
+from random import choice
 
 
-# Функция для получения случайных изображений
 def pics_to_post(directory):
-    images = [os.path.join(directory, img) for img in os.listdir(directory) if img.lower().endswith(('png', 'jpg', 'jpeg', 'gif'))]
-    shuffle(images)  # Перемешиваем изображения для случайного выбора
-    return images
+    return [os.path.join(directory, img) for img in os.listdir(directory) if img.lower().endswith(('png', 'jpg', 'jpeg', 'gif'))]
 
 
-# Функция для отправки текста в канал
+def send_photo_to_channel(bot, chat_id, photo_path):
+    try:
+        with open(photo_path, 'rb') as img:
+            bot.send_photo(chat_id=chat_id, photo=img)
+        print(f"Posted {photo_path} to the channel.")
+    except Exception as e:
+        print(f"Error posting {photo_path}: {e}")
+
+
 def send_text_to_channel(bot, chat_id, text):
     try:
         bot.send_message(chat_id=chat_id, text=text)
@@ -23,48 +28,47 @@ def send_text_to_channel(bot, chat_id, text):
 
 
 def main():
-    # Парсер аргументов для указания времени и директории с фото
     parser = argparse.ArgumentParser(
-        description='Please enter time interval for posting and directory with pics'
+        description='Please enter time interval for posting, directory with pics, and optionally specify a single image'
     )
     parser.add_argument('--time', help='time interval between posts in seconds', type=int, default=None)
     parser.add_argument('--path', help='directory consisting pics to post', default='images')
+    parser.add_argument('--image', help='specific image to post', type=str, default=None)
     parser.add_argument('--text', help='text to post in the channel', type=str, default=None)
     args = parser.parse_args()
 
-    # Загрузка переменных окружения
     load_dotenv(find_dotenv())
     bot = telegram.Bot(token=os.getenv('TG_API_KEY'))
     chat_id = os.getenv('TG_CHAT_ID')
 
-    # Получаем частоту публикаций из флага --time или переменной окружения POST_FREQ
-    post_freq = args.time if args.time is not None else int(os.getenv('POST_FREQ', 14400))  # Приоритет флага --time
+    post_freq = args.time if args.time is not None else int(os.getenv('POST_FREQ', 14400))
 
-    # Если нужно отправить текст
     if args.text:
         send_text_to_channel(bot, chat_id, args.text)
 
-    # Получаем список изображений
     images = pics_to_post(args.path)
 
+    if args.image:
+        image_path = args.image if os.path.isabs(args.image) else os.path.join(args.path, args.image)
+        if os.path.exists(image_path):
+            send_photo_to_channel(bot, chat_id, image_path)
+        else:
+            print(f"Image {image_path} does not exist.")
+        return
+
+    posted_images = set()
     while True:
-        # Публикуем изображения одно за другим
-        for image in images:
-            try:
-                # Отправляем фото в указанный чат
-                with open(image, 'rb') as img:
-                    bot.send_photo(chat_id=chat_id, photo=img)
-                print(f"Posted {image} to the channel.")
+        available_images = [img for img in images if img not in posted_images]
 
-                # Ждем заданный интервал времени перед публикацией следующего фото
-                time.sleep(post_freq)
-            except Exception as e:
-                print(f"Error posting {image}: {e}")
+        if not available_images:
+            print('All available photos have been posted.')
+            break
 
-        # Перемешиваем изображения снова для рандомного порядка
-        shuffle(images)
+        image = choice(available_images)
+        send_photo_to_channel(bot, chat_id, image)
+        posted_images.add(image)
+        time.sleep(post_freq)
 
 
 if __name__ == '__main__':
     main()
-
