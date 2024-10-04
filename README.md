@@ -83,6 +83,13 @@ python bot.py --time 3600 --path images
 
 - `--time` is the time interval between posts (default: `POST_FREQ` environment variable).
 - `--path` specifies the directory with images to post (default: `images`).
+
+Post a certain photo: 
+```bash
+python bot.py --image NASA_PIC.jpg
+```
+- `--image` specifies a file name to be posted, file extension required.
+
   
 ## Utilities
 - `utils.py` includes helper functions like:
