@@ -43,10 +43,10 @@ def main():
 
     payload = {'api_key': nasa_api_key}
     pic_info = create_pic_info_list(payload)
-    for index, pic in enumerate(pic_info[(-int(args.number_of_pic) - 1):-1]):
+    for index, pic in enumerate(pic_info[(-int(args.number_of_pic) - 1):-1], start=1):
         try:
             fetch_epic_pic(payload, pic, index, args.path)
-            print('pictures saved')
+            print(f'saved picture #{index}')
         except ValueError:
             print('please type integer')
 
