@@ -17,7 +17,7 @@ def create_pic_info_list(payload):
 def fetch_epic_pic(payload, pic, pic_number, path):
     needed_date = datetime.date.fromisoformat(pic)
     formated_date = needed_date.strftime('%Y/%m/%d')
-    url = f"https://api.nasa.gov/EPIC/api/natural/date/{needed_date}"
+    url = f'https://api.nasa.gov/EPIC/api/natural/date/{needed_date}'
     response = requests.get(url, params=payload)
     response.raise_for_status()
     pic_url_for_download = f'https://api.nasa.gov/EPIC/archive/natural/{formated_date}/png/' \
