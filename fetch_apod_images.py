@@ -2,7 +2,7 @@ import requests
 import os
 import argparse
 from dotenv import load_dotenv, find_dotenv
-from utils import download_pic, get_extention
+from utils import download_pic, get_extension
 
 
 def create_apod_pic_list(payload):
@@ -13,19 +13,19 @@ def create_apod_pic_list(payload):
     return apod_pics
 
 
-def fetch_apod_pic(apod_pics, path):
-    url_pics = []
+def fetch_apod_pics(apod_pics, path):
+    pics_url = []
     for pic in apod_pics:
         if pic['url']:
             try:
-                url_pics.append(pic['thumbnail_url'])
+                pics_url.append(pic['thumbnail_url'])
             except KeyError:
-                url_pics.append(pic['url'])
+                pics_url.append(pic['url'])
         else:
             print(pic['date'], 'no photo for this date')
 
-    for index, pic in enumerate(url_pics):
-        file_ext = get_extention(pic)
+    for index, pic in enumerate(pics_url):
+        file_ext = get_extension(pic)
         filename = f'nasa_apod_{index}{file_ext}'
         download_pic(pic, filename, path)
 
@@ -45,7 +45,7 @@ def main():
                }
     apod_pics = create_apod_pic_list(payload)
     try:
-        fetch_apod_pic(apod_pics, args.path)
+        fetch_apod_pics(apod_pics, args.path)
         print('pictures saved')
     except ValueError:
         print('please type integer')
