@@ -10,12 +10,16 @@ def fetch_spacex_last_launch(launch_id, path):
     response.raise_for_status()
     photos_to_save = response.json()['links']['flickr']['original']
     if photos_to_save:
-        for index, pic in enumerate(photos_to_save, start=1):
-            filename = f'spacex_launch{index}.jpg'
-            download_pic(pic, filename, path)
-            print(f'Saved {filename}')
+        save_photos(photos_to_save, path)
     else:
         print('No available photos for this launch')
+
+
+def save_photos(photos, path):
+    for index, pic in enumerate(photos, start=1):
+        filename = f'spacex_launch{index}.jpg'
+        download_pic(pic, filename, path)
+        print(f'Saved {filename}')
 
 
 def main():
