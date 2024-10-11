@@ -12,11 +12,10 @@ def download_pic(url, filename, path):
         file.write(response.content)
 
 
-def get_extention(url):
+def get_extension(url):
     sep_url = urlsplit(url)
     path_to_file = split(unquote(sep_url.path))
     path_to_image, image_name = path_to_file
     image = splitext(image_name)
     name, ext = image
     return ext
-
